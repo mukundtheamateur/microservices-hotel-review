@@ -25,10 +25,12 @@ public class UserController {
 	@Autowired
 	private UserService userService;
 
+
 	@PostMapping
 	public ResponseEntity<User> createUser(@RequestBody User user){
 		User user1 = userService.saveUser(user);
 		log.info("User created Successfully");
+		user1.setRole("USER");
 		return ResponseEntity.status(HttpStatus.CREATED).body(user1);
 	}
 	

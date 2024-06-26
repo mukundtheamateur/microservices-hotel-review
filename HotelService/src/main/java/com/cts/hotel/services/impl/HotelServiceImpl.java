@@ -27,8 +27,11 @@ public class HotelServiceImpl implements HotelService{
 
 	@Override
 	public List<Hotel> getAll() {
-		// TODO Auto-generated method stub
-		return hotelRepository.findAll();
+		
+		List<Hotel> hotels =  hotelRepository.findAll();
+
+		if(hotels.isEmpty()) return null;
+		return hotels;
 	}
 
 	@Override

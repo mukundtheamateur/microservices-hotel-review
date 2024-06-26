@@ -6,5 +6,7 @@ eureka:
     fetch-registry: false
   dashboard:
     path: /
+  server:
+    enableSelfPreservation: false
 server:
   port: 8761
