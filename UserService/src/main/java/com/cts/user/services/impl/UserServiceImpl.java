@@ -15,6 +15,7 @@ import com.cts.user.entities.Hotel;
 import com.cts.user.entities.Rating;
 import com.cts.user.entities.User;
 import com.cts.user.exceptions.ResourceNotFoundException;
+import com.cts.user.external.services.HotelService;
 import com.cts.user.repositories.UserRepository;
 import com.cts.user.services.UserService;
 
@@ -27,7 +28,8 @@ public class UserServiceImpl implements UserService{
 	@Autowired
 	private UserRepository userRepository;
 	
-	
+	@Autowired
+	private HotelService hotelService;
 	@Autowired
 	private RestTemplate restTemplate;
 
@@ -51,17 +53,23 @@ public class UserServiceImpl implements UserService{
 		log.info("user with userID fetched successfully");
 		User user = userRepository.findById(userId).orElseThrow(()-> new ResourceNotFoundException("user with given id can't be found: "+ userId));
 	
-		Rating[] fetchRatings = restTemplate.getForObject("http://localhost:8083/ratings/users/" + userId, Rating[].class);
+		Rating[] fetchRatings = restTemplate.getForObject("http://RATING-SERVICE/ratings/users/" + userId, Rating[].class);
 		log.info("{}", fetchRatings);
 		
 		List<Rating> ratings = Arrays.stream(fetchRatings).toList();
 		
 		List<Rating> ratingList = ratings.stream().map(rating->{
 			
-			ResponseEntity<Hotel> forEntity = restTemplate.getForEntity("http://localhost:8082/hotels/" + rating.getHotelId(), Hotel.class);
-			Hotel hotel = forEntity.getBody();
+			// fetching hotel details using restTemplate
+			
+//			ResponseEntity<Hotel> forEntity = restTemplate.getForEntity("http://HOTELSERVICE/hotels/" + rating.getHotelId(), Hotel.class);
+//			Hotel hotel = forEntity.getBody();
+
+			// fetching hotel details using Feign Client (Declarative http appraoch)
+			Hotel hotel = hotelService.getHotel(rating.getHotelId());
 			rating.setHotel(hotel);
 			return rating;
+			
 		}).collect(Collectors.toList());
 		
 		user.setRatings(ratingList);
